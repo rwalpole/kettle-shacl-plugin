@@ -24,13 +24,13 @@ class ShaclStepSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
 
 
-  "dsda" must {
-    "dasda" in {
+  "ShaclStep " must {
+    "successfully process a row" in {
       KettleEnvironment.init(false)
       //when(mockStepMeta1.getName).thenReturn(STEP_NAME)
       val tm = TransTestFactory.generateTestTransformation(new Variables(), meta, STEP_NAME)
       val result = TransTestFactory.executeTestTransformation(tm,TransTestFactory.INJECTOR_STEPNAME, STEP_NAME, TransTestFactory.DUMMY_STEPNAME, new util.ArrayList[RowMetaAndData]())
-      result must contain(null)
+      result must equal(List.empty[RowMetaAndData])
       //when(mockTransMeta.findStep(STEP_NAME)).thenReturn(mockStepMeta2)
       //when(mockStepMeta2.getTargetStepPartitioningMeta).thenReturn(mockStepPartitioningMeta)
       //val shaclStep = ShaclStep(mockStepMeta1, data, 0, mockTransMeta, mockTrans)

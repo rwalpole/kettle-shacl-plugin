@@ -30,7 +30,7 @@ case class ShaclStep(s: StepMeta, stepDataInterface: StepDataInterface, c: Int, 
       false
     } else {
       data.shaclValidator = Some(ShaclValidator.get())
-      data.shapesGraph = Some(RDFDataMgr.loadGraph(""))
+      data.shapesGraph = Some(RDFDataMgr.loadGraph("ODRL-shape.ttl"))
       true
     }
   }
