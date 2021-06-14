@@ -63,3 +63,5 @@ libraryDependencies += "org.mockito"       % "mockito-core"          % "3.11.0" 
 libraryDependencies += "org.scalatestplus" %% "mockito-3-4"          % "3.2.9.0" % "test"
 
 scalafmtOnCompile := true
+
+Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.ScalaLibrary

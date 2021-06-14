@@ -14,9 +14,12 @@ import scala.jdk.CollectionConverters._
 @SuppressWarnings(
   Array(
     "org.wartremover.warts.AsInstanceOf",
+    "org.wartremover.warts.StringPlusAny",
+    "org.wartremover.warts.IsInstanceOf",
     "org.wartremover.warts.Var",
     "org.wartremover.warts.Throw",
-    "org.wartremover.warts.Null"))
+    "org.wartremover.warts.Null"
+  ))
 case class ShaclStep(s: StepMeta, stepDataInterface: StepDataInterface, c: Int, t: TransMeta, dis: Trans)
     extends BaseStep(s, stepDataInterface, c, t, dis) with StepInterface {
 
@@ -59,7 +62,7 @@ case class ShaclStep(s: StepMeta, stepDataInterface: StepDataInterface, c: Int, 
 //      }
     }
 
-    val row = getRow
+    val row: Array[AnyRef] = getRow
     var rowInError = false
     val errMsgBuilder = new StringBuilder
     var errCnt: Long = 0
@@ -71,20 +74,26 @@ case class ShaclStep(s: StepMeta, stepDataInterface: StepDataInterface, c: Int, 
       val inputRowMeta = getInputRowMeta
       // use meta.getFields() to change it, so it reflects the output row structure
       meta.getFields(data.outputRowMeta.getOrElse(new RowMeta), getStepname, null, null, null, null, null)
-      val jenaModelFieldValue = inputRowMeta.indexOfValue("")
+      val jenaModelFieldIdx = inputRowMeta.indexOfValue("jena_model")
+      val jenaModelField: AnyRef = row(jenaModelFieldIdx)
       try {
-        val dataModel = jenaModelFieldValue.asInstanceOf[Model]
-        val dataGraph = dataModel.getGraph
-        val shapesGraph = getShapesGraph(data)
-        data.shaclValidator match {
-          case Some(validator) =>
-            if (!validator.conforms(shapesGraph, dataGraph)) {
-              val report = validator.validate(shapesGraph, dataGraph)
-              report.getEntries.asScala.foreach(entry => errMsgBuilder.append(entry.message()))
-              rowInError = true
-              errCnt = errCnt + 1
-            }
-          case _ => throw new KettleException("No ShaclValidator instance found")
+        if (jenaModelField.isInstanceOf[Model]) {
+          val dataModel = jenaModelField.asInstanceOf[Model]
+          val dataGraph = dataModel.getGraph
+          val shapesGraph = getShapesGraph(data)
+          data.shaclValidator match {
+            case Some(validator) =>
+              if (!validator.conforms(shapesGraph, dataGraph)) {
+                val report = validator.validate(shapesGraph, dataGraph)
+                report.getEntries.asScala.foreach(entry => errMsgBuilder.append(entry.message()))
+                rowInError = true
+                errCnt = errCnt + 1
+              }
+            case _ => throw new KettleException("No ShaclValidator instance found")
+          }
+        } else {
+          throw new KettleException(
+            "Expected field " + jenaModelField + " to contain a Jena Model, but found " + jenaModelField.getClass)
         }
 
       } catch {

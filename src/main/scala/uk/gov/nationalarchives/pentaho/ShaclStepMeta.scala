@@ -42,4 +42,6 @@ case class ShaclStepMeta() extends BaseStepMeta with StepMetaInterface {
     */
   //def getOutputField: String = outputField
 
+  //def setJenaModelField()
+
 }
